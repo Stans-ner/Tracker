@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>Ежедневный Трекер</title>
-    <link rel="/Tracker/manifest" href="/Tracker/manifest.json">
+    <link rel="https://stans-ner.github.io/Tracker/manifest" href="https://stans-ner.github.io/Tracker/manifest.json">
     <meta name="theme-color" content="#3498db">
     <style>
         :root {
@@ -359,7 +359,7 @@
 
     // Регистрация Service Worker для PWA
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/Tracker/sw.js')
+        navigator.serviceWorker.register('https://stans-ner.github.io/Tracker/sw.js')
             .then(reg => console.log('SW registered'))
             .catch(err => console.log('SW registration failed:', err));
     }
