@@ -359,7 +359,7 @@
 
     // Регистрация Service Worker для PWA
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('https://stans-ner.github.io/Tracker/sw.js')
+        navigator.serviceWorker.register('/Tracker/sw.js?v=3')
             .then(reg => console.log('SW registered'))
             .catch(err => console.log('SW registration failed:', err));
     }
