@@ -1,7 +1,7 @@
 const CACHE_NAME = 'tracker';
 const urlsToCache = [
-  '/Tracker/Tracker.html',
-  '/Tracker/manifest.json'
+  'https://stans-ner.github.io/Tracker/Tracker.html',
+  'https://stans-ner.github.io/Tracker/manifest.json'
 ];
 
 self.addEventListener('install', event => {
