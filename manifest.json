@@ -2,7 +2,7 @@
   "name": "Ежедневный Трекер",
   "short_name": "Трекер",
   "description": "Ежедневный трекер состояния",
-  "start_url": "/Tracker/Tracker.html",
+  "start_url": "https://stans-ner.github.io/Tracker/Tracker.html",
   "display": "standalone",
   "background_color": "#f4f7f6",
   "theme_color": "#3498db",
