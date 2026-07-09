@@ -1,5 +1,6 @@
 const CACHE_NAME = 'tracker-v3';
 const urlsToCache = [
+  '/Tracker/',
   '/Tracker/index.html',
   '/Tracker/manifest.json'
 ];
