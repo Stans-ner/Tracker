@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Ежедневный Трекер</title>
+    <link rel="manifest" href="manifest.json?v=2">
+    <meta name="theme-color" content="#3498db">
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --bg: #f4f7f6;
+            --card: #ffffff;
+            --text: #333333;
+            --border: #e0e0e0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        h1 { color: var(--primary); margin-bottom: 10px; font-size: 1.5rem; }
+        
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .nav-tabs button, .nav-tabs label {
+            flex: 1;
+            min-width: 120px;
+            padding: 12px;
+            border: none;
+            background: var(--card);
+            color: var(--primary);
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: all 0.2s;
+            text-align: center;
+        }
+        .nav-tabs button.active {
+            background: var(--accent);
+            color: white;
+        }
+        .nav-tabs button:hover { transform: translateY(-2px); }
+
+        .card {
+            background: var(--card);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .form-group { margin-bottom: 20px; }
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        .hint { font-size: 0.85rem; color: #666; font-weight: normal; display: block; margin-top: 2px;}
+
+        input[type="date"], input[type="text"], input[type="password"], textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        textarea { resize: vertical; min-height: 80px; }
+
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        input[type="range"] {
+            flex: 1;
+            height: 6px;
+            -webkit-appearance: none;
+            background: #ddd;
+            border-radius: 3px;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px; height: 24px;
+            background: var(--accent);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .slider-value {
+            min-width: 30px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--accent);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .btn-submit:hover { background: #2ecc71; }
+        .btn-submit.editing { background: #f39c12; }
+        .btn-submit.editing:hover { background: #e67e22; }
+
+        .table-wrap { overflow-x: auto; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid var(--border);
+            text-align: left;
+        }
+        th { background: #f8f9fa; position: sticky; top: 0; }
+        
+        .hidden { display: none; }
+        .success-msg {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        
+        .btn-edit, .btn-delete {
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            margin-right: 5px;
+        }
+        .btn-edit { background: #3498db; color: white; }
+        .btn-edit:hover { background: #2980b9; }
+        .btn-delete { background: #e74c3c; color: white; }
+        .btn-delete:hover { background: #c0392b; }
+
+        .sync-status {
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        .sync-status.success { background: #d4edda; color: #155724; }
+        .sync-status.error { background: #f8d7da; color: #721c24; }
+        .sync-status.info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Ежедневный Трекер Состояния</h1>
+    </header>
+
+    <div class="nav-tabs">
+        <button id="tab-entry" class="active" onclick="showView('entry')">Новая запись</button>
+        <button id="tab-history" onclick="showView('history')">История</button>
+        <button id="tab-sync" onclick="showView('sync')">Синхронизация</button>
+        <button onclick="exportCSV()">Экспорт в Excel</button>
+        <button onclick="exportJSON()">Бэкап (JSON)</button>
+        <button onclick="clearAll()" style="background:#e74c3c; color:white;">Очистить всё</button>
+        <label for="importJSON">Загрузить бэкап</label>
+        <input type="file" id="importJSON" class="hidden" accept=".json" onchange="importJSON(event)">
+    </div>
+
+    <div id="success-msg" class="success-msg hidden">Запись успешно сохранена!</div>
+
+    <!-- ФОРМА ВВОДА -->
+    <div id="view-entry" class="card">
+        <form id="entryForm" onsubmit="saveEntry(event)">
+            <div class="form-group">
+                <label>Дата</label>
+                <input type="date" id="date" required onchange="updateWeekday()">
+            </div>
+            <div class="form-group">
+                <label>День недели</label>
+                <input type="text" id="weekday" readonly style="background:#f8f9fa;">
+            </div>
+
+            <div class="form-group">
+                <label>Энергия <span class="hint">(-10 - 10: силы, желание и готовность что-то делать)</span></label>
+                <div class="slider-group">
+                    <input type="range" id="energy" min="-10" max="10" value="0" oninput="this.nextElementSibling.value = this.value">
+                    <output class="slider-value">0</output>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Комфорт <span class="hint">(-10 - 10: физический, эмоциональный, психологический, социальный, смысловой)</span></label>
+                <div class="slider-group">
+                    <input type="range" id="comfort" min="-10" max="10" value="0" oninput="this.nextElementSibling.value = this.value">
+                    <output class="slider-value">0</output>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Продуктивность <span class="hint">(-10 - 10: результативность, выполнение запланированного/ситуативного)</span></label>
+                <div class="slider-group">
+                    <input type="range" id="productivity" min="-10" max="10" value="0" oninput="this.nextElementSibling.value = this.value">
+                    <output class="slider-value">0</output>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Взаимодействие <span class="hint">(-10 - 10: позитивность и успешность общения на работе, в семье, в обществе)</span></label>
+                <div class="slider-group">
+                    <input type="range" id="interaction" min="-10" max="10" value="0" oninput="this.nextElementSibling.value = this.value">
+                    <output class="slider-value">0</output>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Суверенитет <span class="hint">(-10 - 10: свобода, самостоятельность, ответственность без понуждения)</span></label>
+                <div class="slider-group">
+                    <input type="range" id="sovereignty" min="-10" max="10" value="0" oninput="this.nextElementSibling.value = this.value">
+                    <output class="slider-value">0</output>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Я <span class="hint">(-10 - 10: общая оценка себе, удовлетворенность собой сегодня)</span></label>
+                <div class="slider-group">
+                    <input type="range" id="self" min="-10" max="10" value="0" oninput="this.nextElementSibling.value = this.value">
+                    <output class="slider-value">0</output>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>День <span class="hint">(-10 - 10: общая оценка дня, насколько он был хорошим и удачным)</span></label>
+                <div class="slider-group">
+                    <input type="range" id="day" min="-10" max="10" value="0" oninput="this.nextElementSibling.value = this.value">
+                    <output class="slider-value">0</output>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Событие <span class="hint">(ТОЛЬКО факты, без оценок)</span></label>
+                <textarea id="event" required placeholder="Например: 1. Прошел 10 000 шагов. 2. Встреча с клиентом."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Комментарии</label>
+                <textarea id="comments" placeholder="Дополнительные заметки..."></textarea>
+            </div>
+
+            <button type="submit" class="btn-submit" id="submitBtn">Сохранить запись</button>
+            <button type="button" class="btn-submit hidden" id="cancelEditBtn" onclick="cancelEdit()" style="background:#95a5a6; margin-top:10px;">Отменить редактирование</button>
+        </form>
+    </div>
+
+    <!-- ИСТОРИЯ -->
+    <div id="view-history" class="card hidden">
+        <h2 style="margin-top:0;">История записей</h2>
+        <div class="table-wrap">
+            <table id="historyTable">
+                <thead>
+                    <tr>
+                        <th>Дата</th><th>День</th><th>Эн</th><th>Ком</th><th>Прод</th>
+                        <th>Взаим</th><th>Сув</th><th>Я</th><th>День</th><th>Событие</th><th>Комм.</th><th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody id="historyBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- СИНХРОНИЗАЦИЯ -->
+    <div id="view-sync" class="card hidden">
+        <h2 style="margin-top:0;">Синхронизация через облачную папку</h2>
+        <div id="sync-status" class="sync-status info">
+            Выберите папку, синхронизированную с облаком (Nextcloud, Dropbox, Google Drive и т.д.). 
+            На компьютере данные будут синхронизироваться автоматически.
+        </div>
+        
+        <div id="desktop-sync">
+            <div class="form-group">
+                <label>Папка для данных</label>
+                <button onclick="selectFolder()" class="btn-submit" style="background:#3498db;">
+                    📁 Выбрать папку
+                </button>
+                <div id="folder-info" style="margin-top:10px; font-size:0.9rem; color:#666;"></div>
+                <span class="hint">
+                    Выберите папку в вашей облачной синхронизации (например: Nextcloud/Tracker)
+                </span>
+            </div>
+
+            <div class="form-group">
+                <label>Имя файла</label>
+                <input type="text" id="fileName" value="tracker_data.json" placeholder="tracker_data.json">
+            </div>
+
+            <button onclick="saveToFolder()" class="btn-submit" style="background:#27ae60;">Загрузить в папку ↑</button>
+            <button onclick="loadFromFolder()" class="btn-submit" style="background:#9b59b6; margin-top:10px;">Загрузить из папки ↓</button>
+            
+            <div class="form-group" style="margin-top:20px;">
+                <label>
+                    <input type="checkbox" id="autoSync" onchange="toggleAutoSync()">
+                    Автоматическая синхронизация при сохранении
+                </label>
+            </div>
+        </div>
+
+        <div id="mobile-sync" class="hidden">
+            <p style="color:#666; font-size:0.9rem;">
+                На мобильных устройствах автоматическая синхронизация с папкой недоступна. 
+                Используйте ручной импорт/экспорт файла.
+            </p>
+            <button onclick="exportJSON()" class="btn-submit" style="background:#27ae60;">Скачать файл</button>
+            <button onclick="document.getElementById('importJSON').click()" class="btn-submit" style="background:#9b59b6; margin-top:10px;">Загрузить файл</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let records = JSON.parse(localStorage.getItem('dailyTrackerRecords')) || [];
+    let editingDate = null;
+    let directoryHandle = null;
+    const daysOfWeek = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
+
+    // Регистрация Service Worker для PWA
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/Tracker/sw.js?v=2')
+            .then(reg => console.log('SW registered'))
+            .catch(err => console.log('SW registration failed:', err));
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('date').value = today;
+        updateWeekday();
+        
+        // Определяем возможности браузера
+        if ('showDirectoryPicker' in window) {
+            document.getElementById('desktop-sync').classList.remove('hidden');
+            document.getElementById('mobile-sync').classList.add('hidden');
+            restoreFolderHandle();
+        } else {
+            document.getElementById('desktop-sync').classList.add('hidden');
+            document.getElementById('mobile-sync').classList.remove('hidden');
+        }
+    });
+
+    function updateWeekday() {
+        const dateStr = document.getElementById('date').value;
+        if (dateStr) {
+            const date = new Date(dateStr);
+            document.getElementById('weekday').value = daysOfWeek[date.getDay()];
+        }
+    }
+
+    function showView(view) {
+        document.getElementById('view-entry').classList.toggle('hidden', view !== 'entry');
+        document.getElementById('view-history').classList.toggle('hidden', view !== 'history');
+        document.getElementById('view-sync').classList.toggle('hidden', view !== 'sync');
+        document.getElementById('tab-entry').classList.toggle('active', view === 'entry');
+        document.getElementById('tab-history').classList.toggle('active', view === 'history');
+        document.getElementById('tab-sync').classList.toggle('active', view === 'sync');
+        
+        if (view === 'history') renderHistory();
+    }
+
+    function saveEntry(e) {
+        e.preventDefault();
+        const entry = {
+            date: document.getElementById('date').value,
+            weekday: document.getElementById('weekday').value,
+            energy: document.getElementById('energy').value,
+            comfort: document.getElementById('comfort').value,
+            productivity: document.getElementById('productivity').value,
+            interaction: document.getElementById('interaction').value,
+            sovereignty: document.getElementById('sovereignty').value,
+            self: document.getElementById('self').value,
+            day: document.getElementById('day').value,
+            event: document.getElementById('event').value,
+            comments: document.getElementById('comments').value
+        };
+
+        if (editingDate) {
+            const index = records.findIndex(r => r.date === editingDate);
+            if (index !== -1) {
+                records[index] = entry;
+            }
+            cancelEdit();
+        } else {
+            records.push(entry);
+        }
+
+        localStorage.setItem('dailyTrackerRecords', JSON.stringify(records));
+
+        document.getElementById('entryForm').reset();
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('date').value = today;
+        updateWeekday();
+        document.querySelectorAll('input[type="range"]').forEach(el => {
+            el.value = 5;
+            el.nextElementSibling.value = 5;
+        });
+
+        const msg = document.getElementById('success-msg');
+        msg.textContent = editingDate ? 'Запись обновлена!' : 'Запись сохранена!';
+        msg.classList.remove('hidden');
+        setTimeout(() => msg.classList.add('hidden'), 3000);
+
+        // Автосинхронизация
+        if (localStorage.getItem('autoSync') === 'true' && directoryHandle) {
+            saveToFolder(true);
+        }
+    }
+
+    function editRecord(date) {
+        const record = records.find(r => r.date === date);
+        if (!record) return;
+
+        editingDate = date;
+        document.getElementById('date').value = record.date;
+        document.getElementById('weekday').value = record.weekday;
+        ['energy','comfort','productivity','interaction','sovereignty','self','day'].forEach(key => {
+            const el = document.getElementById(key);
+            el.value = record[key];
+            el.nextElementSibling.value = record[key];
+        });
+        document.getElementById('event').value = record.event;
+        document.getElementById('comments').value = record.comments;
+
+        document.getElementById('submitBtn').textContent = 'Обновить запись';
+        document.getElementById('submitBtn').classList.add('editing');
+        document.getElementById('cancelEditBtn').classList.remove('hidden');
+
+        showView('entry');
+    }
+
+    function cancelEdit() {
+        editingDate = null;
+        document.getElementById('submitBtn').textContent = 'Сохранить запись';
+        document.getElementById('submitBtn').classList.remove('editing');
+        document.getElementById('cancelEditBtn').classList.add('hidden');
+        document.getElementById('entryForm').reset();
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('date').value = today;
+        updateWeekday();
+        document.querySelectorAll('input[type="range"]').forEach(el => {
+            el.value = 5;
+            el.nextElementSibling.value = 5;
+        });
+    }
+
+    function renderHistory() {
+        const tbody = document.getElementById('historyBody');
+        tbody.innerHTML = '';
+        const sorted = [...records].sort((a, b) => new Date(b.date) - new Date(a.date));
+        
+        sorted.forEach(r => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${formatDate(r.date)}</td>
+                <td>${r.weekday}</td>
+                <td>${r.energy}</td><td>${r.comfort}</td><td>${r.productivity}</td>
+                <td>${r.interaction}</td><td>${r.sovereignty}</td><td>${r.self}</td><td>${r.day}</td>
+                <td>${r.event}</td>
+                <td>${r.comments}</td>
+                <td>
+                    <button onclick="editRecord('${r.date}')" class="btn-edit">✏️</button>
+                    <button onclick="deleteRecord('${r.date}')" class="btn-delete">✕</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function formatDate(dateStr) {
+        if(!dateStr) return '';
+        const parts = dateStr.split('-');
+        return `${parts[2]}.${parts[1]}.${parts[0]}`;
+    }
+
+    function clearAll() {
+        if (confirm('Удалить ВСЕ записи? Это нельзя отменить.')) {
+            records = [];
+            localStorage.setItem('dailyTrackerRecords', JSON.stringify(records));
+            renderHistory();
+            alert('Все записи удалены.');
+        }
+    }
+
+    function deleteRecord(date) {
+        if (confirm('Удалить запись за ' + formatDate(date) + '?')) {
+            records = records.filter(r => r.date !== date);
+            localStorage.setItem('dailyTrackerRecords', JSON.stringify(records));
+            renderHistory();
+        }
+    }
+
+    function exportCSV() {
+        if (records.length === 0) { alert('Нет записей.'); return; }
+        let csv = '\uFEFF';
+        csv += 'Дата;День недели;Энергия;Комфорт;Продуктивность;Взаимодействие;Суверенитет;Я;День;Событие;Комментарии\n';
+        records.forEach(r => {
+            const event = `"${r.event.replace(/"/g, '""')}"`;
+            const comments = `"${r.comments.replace(/"/g, '""')}"`;
+            csv += `${formatDate(r.date)};${r.weekday};${r.energy};${r.comfort};${r.productivity};${r.interaction};${r.sovereignty};${r.self};${r.day};${event};${comments}\n`;
+        });
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `Tracker_Export_${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
+    }
+
+    function exportJSON() {
+        const blob = new Blob([JSON.stringify(records, null, 2)], { type: 'application/json' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `Tracker_Backup_${new Date().toISOString().split('T')[0]}.json`;
+        link.click();
+    }
+
+    function importJSON(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const imported = JSON.parse(e.target.result);
+                if (Array.isArray(imported)) {
+                    records = imported;
+                    localStorage.setItem('dailyTrackerRecords', JSON.stringify(records));
+                    alert('Загружено записей: ' + records.length);
+                    showView('history');
+                } else {
+                    alert('Ошибка формата.');
+                }
+            } catch (err) {
+                alert('Ошибка: ' + err.message);
+            }
+        };
+        reader.readAsText(file);
+        event.target.value = '';
+    }
+
+    // === СИНХРОНИЗАЦИЯ ЧЕРЕЗ ПАПКУ (File System Access API) ===
+
+    async function selectFolder() {
+        try {
+            directoryHandle = await window.showDirectoryPicker();
+            localStorage.setItem('folderHandle', 'selected');
+            document.getElementById('folder-info').innerHTML = 
+                `✓ Выбрана папка: <strong>${directoryHandle.name}</strong>`;
+            showSyncStatus('Папка выбрана. Теперь можете загружать/скачивать данные.', 'success');
+        } catch (err) {
+            if (err.name !== 'AbortError') {
+                showSyncStatus('Ошибка: ' + err.message, 'error');
+            }
+        }
+    }
+
+    async function restoreFolderHandle() {
+        if (localStorage.getItem('folderHandle')) {
+            document.getElementById('folder-info').innerHTML = 
+                '⚠️ Выберите папку заново (браузер не сохраняет доступ между сессиями)';
+        }
+    }
+
+    async function saveToFolder(silent = false) {
+        if (!directoryHandle) {
+            if (!silent) showSyncStatus('Сначала выберите папку', 'error');
+            return;
+        }
+
+        try {
+            const fileName = document.getElementById('fileName').value || 'tracker_data.json';
+            const fileHandle = await directoryHandle.getFileHandle(fileName, { create: true });
+            const writable = await fileHandle.createWritable();
+            await writable.write(JSON.stringify(records, null, 2));
+            await writable.close();
+
+            if (!silent) {
+                showSyncStatus(`✓ Данные сохранены в файл: ${fileName}`, 'success');
+            }
+        } catch (err) {
+            if (!silent) showSyncStatus('Ошибка сохранения: ' + err.message, 'error');
+        }
+    }
+
+    async function loadFromFolder() {
+        if (!directoryHandle) {
+            showSyncStatus('Сначала выберите папку', 'error');
+            return;
+        }
+
+        try {
+            const fileName = document.getElementById('fileName').value || 'tracker_data.json';
+            const fileHandle = await directoryHandle.getFileHandle(fileName);
+            const file = await fileHandle.getFile();
+            const content = await file.text();
+            const imported = JSON.parse(content);
+
+            if (!Array.isArray(imported)) {
+                throw new Error('Неверный формат данных');
+            }
+
+            if (records.length > 0 && imported.length > 0) {
+                if (!confirm('Заменить локальные данные? Локальные записи будут потеряны.')) {
+                    showSyncStatus('Загрузка отменена', 'info');
+                    return;
+                }
+            }
+
+            records = imported;
+            localStorage.setItem('dailyTrackerRecords', JSON.stringify(records));
+            
+            showSyncStatus(`✓ Загружено записей: ${records.length}`, 'success');
+            setTimeout(() => showView('history'), 1000);
+        } catch (err) {
+            if (err.name === 'NotFoundError') {
+                showSyncStatus('Файл не найден в папке. Сначала загрузите данные.', 'error');
+            } else {
+                showSyncStatus('Ошибка загрузки: ' + err.message, 'error');
+            }
+        }
+    }
+
+    function toggleAutoSync() {
+        const checked = document.getElementById('autoSync').checked;
+        localStorage.setItem('autoSync', checked);
+        if (checked) {
+            showSyncStatus('Автосинхронизация включена', 'success');
+        }
+    }
+</script>
+</body>
+</html>
