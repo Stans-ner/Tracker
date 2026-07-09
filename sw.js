@@ -1,7 +1,7 @@
-const CACHE_NAME = 'tracker-v2';
+const CACHE_NAME = 'tracker';
 const urlsToCache = [
-  '/Tracker/Tracker.html?v=2',
-  '/Tracker/manifest.json?v=2'
+  '/Tracker/Tracker.html',
+  '/Tracker/manifest.json'
 ];
 
 self.addEventListener('install', event => {
