@@ -1,6 +1,6 @@
-const CACHE_NAME = 'tracker';
+const CACHE_NAME = 'tracker-v3';
 const urlsToCache = [
-  'https://stans-ner.github.io/Tracker/Tracker.html',
+  'https://stans-ner.github.io/Tracker/index.html',
   'https://stans-ner.github.io/Tracker/manifest.json'
 ];
 
